@@ -1,3 +1,4 @@
+
 # Self-Evaluating Lesson Content Generator
 
 Generates a beginner lesson on **Introduction to RAG**, judges it against hard pass/fail checks, regenerates with the evaluator's reasons (max 2 retries), and writes the passing lesson plus a rejection log that says **what failed, why, and what changed on the retry**. Memory persists across runs.
@@ -58,3 +59,5 @@ Loop = 1 attempt + at most 2 retries (hard cap in code and tested). If nothing p
 
 ## Known limits (honest)
 Deterministic checks catch structure, jargon, overclaims, and invented numbers, not every subtle factual error; that is what the LLM judge and human approval are for. Memory hints are topic-agnostic. The source pack is a small fixed set of notes (no vector DB needed for one topic).
+=======
+
