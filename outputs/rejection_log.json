@@ -1,0 +1,48 @@
+{
+  "topic": "Introduction to RAG",
+  "rubric_version": "2.0.0",
+  "rejections": [
+    {
+      "attempt": 1,
+      "status": "REJECTED",
+      "failed_checks": [
+        "concrete_example",
+        "jargon_explained",
+        "grounding"
+      ],
+      "reasons": [
+        "concrete_example: Add a worked example with 'Question:', 'Retrieved information:' and 'Answer:'. The answer must use words from the retrieved text.",
+        "jargon_explained: Define in plain words before relying on them: index, vector database.",
+        "grounding: Remove overclaims ['always gives correct', 'removes hallucination'], invented numbers []; and state clearly that RAG does not guarantee a correct answer."
+      ],
+      "feedback_sent_to_generator": [
+        "concrete_example: Add a worked example with 'Question:', 'Retrieved information:' and 'Answer:'. The answer must use words from the retrieved text.",
+        "jargon_explained: Define in plain words before relying on them: index, vector database.",
+        "grounding: Remove overclaims ['always gives correct', 'removes hallucination'], invented numbers []; and state clearly that RAG does not guarantee a correct answer."
+      ],
+      "changes_on_retry": {
+        "fixed_checks": [
+          "concrete_example",
+          "grounding",
+          "jargon_explained"
+        ],
+        "still_failing": [],
+        "newly_failing": [],
+        "words_before": 506,
+        "words_after": 599,
+        "lines_added": 9,
+        "lines_removed": 3,
+        "sample_added": [
+          "A **language model** is a computer program that reads and writes text. It learned from a large amount of text in the past. So it may not kno",
+          "3. **Prepare for search:** the system may create an embedding. An embedding is a list of numbers that shows the meaning of a text. Texts wit",
+          "A school handbook says: \"The library closes at 4:00 p.m. on weekdays.\""
+        ],
+        "sample_removed": [
+          "A **language model** is a computer program that reads and writes text. It learned from a large amount of text in the past. So it may not kno",
+          "3. **Store for search:** save the pieces in a vector database and build an index.",
+          "Imagine a student asks a question about the school. The system looks at the handbook and replies."
+        ]
+      }
+    }
+  ]
+}

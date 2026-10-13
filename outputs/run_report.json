@@ -1,0 +1,136 @@
+{
+  "topic": "Introduction to RAG",
+  "status": "APPROVED",
+  "passed": true,
+  "attempts_used": 2,
+  "max_retries": 2,
+  "rubric_version": "2.0.0",
+  "llm_judge_used": false,
+  "generator_mode": "offline-simulator",
+  "attempts": [
+    {
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "definition": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        },
+        "why_it_matters": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        },
+        "how_it_works": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        },
+        "concrete_example": {
+          "status": "FAIL",
+          "reason": "Add a worked example with 'Question:', 'Retrieved information:' and 'Answer:'. The answer must use words from the retrieved text."
+        },
+        "jargon_explained": {
+          "status": "FAIL",
+          "reason": "Define in plain words before relying on them: index, vector database.",
+          "unexplained": [
+            "index",
+            "vector database"
+          ]
+        },
+        "beginner_language": {
+          "status": "PASS",
+          "reason": "Satisfied",
+          "metrics": {
+            "words": 474,
+            "avg_sentence_words": 9.2,
+            "max_sentence_words": 19,
+            "long_word_ratio": 0.006
+          }
+        },
+        "key_points": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        },
+        "coherent_structure": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        },
+        "grounding": {
+          "status": "FAIL",
+          "reason": "Remove overclaims ['always gives correct', 'removes hallucination'], invented numbers []; and state clearly that RAG does not guarantee a correct answer.",
+          "overclaims": [
+            "always gives correct",
+            "removes hallucination"
+          ],
+          "invented_numbers": []
+        },
+        "clean_output": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        }
+      },
+      "failed_checks": [
+        "concrete_example",
+        "jargon_explained",
+        "grounding"
+      ]
+    },
+    {
+      "attempt": 2,
+      "passed": true,
+      "checks": {
+        "definition": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        },
+        "why_it_matters": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        },
+        "how_it_works": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        },
+        "concrete_example": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        },
+        "jargon_explained": {
+          "status": "PASS",
+          "reason": "Satisfied",
+          "unexplained": []
+        },
+        "beginner_language": {
+          "status": "PASS",
+          "reason": "Satisfied",
+          "metrics": {
+            "words": 558,
+            "avg_sentence_words": 9.6,
+            "max_sentence_words": 20,
+            "long_word_ratio": 0.004
+          }
+        },
+        "key_points": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        },
+        "coherent_structure": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        },
+        "grounding": {
+          "status": "PASS",
+          "reason": "Satisfied",
+          "overclaims": [],
+          "invented_numbers": []
+        },
+        "clean_output": {
+          "status": "PASS",
+          "reason": "Satisfied"
+        }
+      },
+      "failed_checks": []
+    }
+  ],
+  "memory_hints_used": "",
+  "design_note": "Deterministic checks are hard gates, not proof of factual correctness; API mode adds an independent LLM judge."
+}
