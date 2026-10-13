@@ -1,63 +1,147 @@
-
 # Self-Evaluating Lesson Content Generator
 
-Generates a beginner lesson on **Introduction to RAG**, judges it against hard pass/fail checks, regenerates with the evaluator's reasons (max 2 retries), and writes the passing lesson plus a rejection log that says **what failed, why, and what changed on the retry**. Memory persists across runs.
+A Python project that generates a beginner-friendly lesson on **Introduction to RAG**, checks the draft against a hard pass/fail rubric, retries with evaluator feedback (up to two retries), and saves the final lesson, rejection log, run report, and persistent SQLite memory.
 
-## Quick start (no API key, Python 3.10+, no packages)
-```bash
-python main.py --demo-fail-first          # offline simulator: flawed draft 1 -> rejected -> fixed draft 2 -> approved
-python -m unittest discover -s tests -v   # 16 offline tests
+## Features
+
+- **Separate generator and evaluator:** the evaluator independently checks the generated lesson.
+- **Hard pass/fail checks:** a lesson is approved only when all required checks pass; there is no average score.
+- **Bounded retry loop:** one initial attempt plus a maximum of two retries.
+- **Deliberate failure demo:** `--demo-fail-first` creates a flawed first draft so you can demonstrate rejection and revision.
+- **Persistent memory:** SQLite stores run and attempt history and recurring failure patterns can inform later prompts.
+- **Grounding:** a small source pack guides lesson content. The rule-based evaluator is not a guarantee that every factual claim is correct.
+
+## Requirements
+
+- Python 3.10 or later
+- No third-party packages are required for the offline demo.
+- An API key is only needed if you want to use the OpenAI-compatible API mode.
+
+## Setup and run (Windows / PowerShell)
+
+1. Download or clone this repository.
+2. Open a terminal in the project root—the folder containing `main.py`, `rag_agent/`, and `tests/`.
+3. Check Python:
+
+```powershell
+python --version
 ```
-`--demo-fail-first` uses a **deterministic offline simulator** (not an LLM). Draft 1 has three real flaws (no labelled example, undefined jargon, an overclaim). On retry the simulator fixes only what the evaluator reported, so the feedback loop is genuinely exercised.
 
-## Real LLM mode
+4. Run the offline demo. It requires no API key:
+
+```powershell
+python main.py --topic "Introduction to RAG" --demo-fail-first
+```
+
+The first draft is deliberately flawed. The evaluator should reject it, send feedback to the generator, and the revised draft should pass. The command prints a run report to the terminal.
+
+5. Run the test suite:
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+The included test suite currently contains four offline tests covering a passing lesson, deliberate failure detection, retry behavior, and the retry cap.
+
+## Run on macOS / Linux
+
+From the project root, run the same commands:
+
 ```bash
-export OPENAI_API_KEY=...            # PowerShell: $env:OPENAI_API_KEY="..."
-export OPENAI_MODEL=gpt-4o-mini      # generator model (optional)
-export OPENAI_JUDGE_MODEL=...        # judge model (optional; use a different model if you can)
+python3 --version
+python3 main.py --topic "Introduction to RAG" --demo-fail-first
+python3 -m unittest discover -s tests -v
+```
+
+If your system uses `python` instead of `python3`, use `python` in the commands.
+
+## Optional: use an OpenAI-compatible API
+
+The generator supports an OpenAI-compatible chat-completions endpoint. Set your environment variables before running without `--demo-fail-first`.
+
+**Windows PowerShell:**
+
+```powershell
+$env:OPENAI_API_KEY="your-api-key"
+$env:OPENAI_MODEL="gpt-4o-mini"
 python main.py --topic "Introduction to RAG"
 ```
-In API mode a **second, independent LLM call (judge, temperature 0)** adds 4 semantic checks (`llm_factual_accuracy`, `llm_beginner_clarity`, `llm_example_quality`, `llm_teaching_flow`) on top of the deterministic gates. If the judge's reply is invalid it **fails closed** (lesson not shipped). API outages count as failed attempts; the pipeline never crashes. `--no-judge` turns the judge off. `OPENAI_BASE_URL` supports any OpenAI-compatible endpoint.
 
-## Architecture
-```text
-topic + source pack + memory hints
-          |
-          v
-   Generator  <------ feedback ("check: reason") ------+
-          |                                            |
-          v                                            |
-   Evaluator = deterministic gates + optional LLM judge
-     PASS -> lesson.md (APPROVED)     FAIL -> rejection_log.json (+ what changed on retry)
-          |                                            |
-          +-------------> SQLite memory <--------------+  (failure patterns + human feedback)
+**macOS / Linux:**
+
+```bash
+export OPENAI_API_KEY="your-api-key"
+export OPENAI_MODEL="gpt-4o-mini"
+python main.py --topic "Introduction to RAG"
 ```
-Loop = 1 attempt + at most 2 retries (hard cap in code and tested). If nothing passes, `lesson.md` is marked **NOT APPROVED — do not publish**.
 
-## Rubric v2.0.0 (every check PASS/FAIL, no scores)
-| Check | What it verifies |
-|---|---|
-| definition | RAG expanded and defined in the first section |
-| why_it_matters | the problem (model guesses / lacks private or new data) and how documents help |
-| how_it_works | >= 4 numbered steps, order chunk -> search -> language model |
-| concrete_example | labelled Question / Retrieved information / Answer, answer words come from the retrieved text |
-| jargon_explained | every watched technical term that appears has a definition (not just 4 fixed terms) |
-| beginner_language | avg sentence <= 18 words, max <= 32, 250-900 words, few long words, analogy present |
-| key_points | >= 2 benefits, >= 2 limitations, keyword/vector search |
-| coherent_structure | 7 headings in the required order |
-| grounding | no overclaims, no numbers outside the source pack (example excluded), explicit "does not guarantee" |
-| clean_output | no leaked meta text (evaluator, source pack, placeholders) |
+Optional configuration:
 
-## Memory / self-evolution
-`memory/memory.sqlite3` keeps attempts, failure reasons, runs, and human feedback (`--feedback "..."`). The most frequent past failures (with their repair instructions) and recent human feedback are injected into the next generation prompt. `memory_snapshot.json` exports the learning; checks that fail >= 5 times are flagged for **human rubric review**. The rubric is never auto-edited, because a system must not lower its own bar to pass.
+- `OPENAI_BASE_URL` — API base URL; defaults to `https://api.openai.com/v1`.
+- `OPENAI_MODEL` — model name; defaults to `gpt-4o-mini`.
+- `--max-retries 0|1|2` — number of retries after the first attempt; maximum is two.
+- `--output-dir outputs` — output folder.
 
-## Outputs (`outputs/`)
-`lesson.md`, `rejection_log.json`, `run_report.json`, `memory_snapshot.json`; `outputs/run2_with_memory/` is a second run showing memory hints and human feedback being used.
+Do not commit API keys or other credentials to GitHub. The offline demo is sufficient to demonstrate the workflow and does not call an external model.
 
-## Files
-`main.py` loop + CLI | `rag_agent/generator.py` | `evaluator.py` | `llm_judge.py` | `llm_client.py` | `memory.py` | `prompts.py` | `sources.py` | `tests/` | `docs/` (DESIGN.md, design PDF, VIDEO_DEMO_SCRIPT.md)
+## Outputs
 
-## Known limits (honest)
-Deterministic checks catch structure, jargon, overclaims, and invented numbers, not every subtle factual error; that is what the LLM judge and human approval are for. Memory hints are topic-agnostic. The source pack is a small fixed set of notes (no vector DB needed for one topic).
-=======
+The run creates these files in `outputs/` (or the folder passed through `--output-dir`):
+
+- `lesson.md` — approved lesson, or a clearly marked **NOT APPROVED** lesson if all attempts fail.
+- `rejection_log.json` — failed checks, reasons, and feedback supplied to the next attempt.
+- `run_report.json` — final status, attempt count, rubric version, and check results.
+- `memory.sqlite3` — persistent run and attempt history.
+
+## Workflow
+
+```text
+Topic + source pack + memory hints
+                |
+                v
+          Generator <--------- evaluator feedback
+                |                       ^
+                v                       |
+        Hard-gate evaluator ------------+
+           | PASS       | FAIL
+           v            v
+      Save lesson   Log rejection and retry
+           \            /
+             SQLite memory
+```
+
+The pipeline stops when the lesson passes or when the initial attempt plus the allowed retries have been used.
+
+## Rubric
+
+The evaluator uses nine hard-gate checks:
+
+1. `definition` — defines RAG and expands the acronym.
+2. `why_it_matters` — explains why RAG is useful.
+3. `how_it_works` — explains the retrieval and generation process.
+4. `concrete_example` — includes a clear example with a question, retrieved information, and answer.
+5. `jargon_explained` — explains key technical terms in plain language.
+6. `beginner_language` — checks beginner-friendly wording and sentence length.
+7. `key_points` — covers benefits and limitations.
+8. `coherent_structure` — checks lesson organization.
+9. `grounding` — checks key source-pack coverage and guards against selected overclaims.
+
+These are transparent rule-based checks, not a complete semantic or factual verification system.
+
+## Project structure
+
+- `main.py` — command-line entry point and bounded retry loop
+- `rag_agent/generator.py` — API and deterministic demo generation
+- `rag_agent/evaluator.py` — pass/fail rubric
+- `rag_agent/memory.py` — SQLite persistence and memory hints
+- `rag_agent/prompts.py` — generation and retry prompts
+- `rag_agent/sources.py` — source pack used for grounding
+- `tests/test_pipeline.py` — four offline tests
+- `docs/DESIGN.md` — design decisions and trade-offs
+- `docs/Assessment_Design_Document.pdf` — design document
+- `docs/VIDEO_DEMO_SCRIPT.md` — short video narration outline
+
+## Known limitations
+
+The offline demo uses a deterministic simulator, not an LLM. The rule-based evaluator checks structure and selected content patterns but cannot catch every subtle factual error. The source pack is small and fixed. For production use, add stronger source-level attribution, independent factual review, broader regression tests, and human approval before publishing educational material.
 
